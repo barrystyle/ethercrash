@@ -6,6 +6,7 @@
 #include <string.h>
 
 #include <string>
+#include <vector>
 
 #include <openssl/hmac.h>
 #include <openssl/sha.h>
@@ -101,13 +102,19 @@ void gen_crashpoint(std::string& server_seed, double& crash)
 int main()
 {
     double gamecrash = 0;
-    unsigned int games = 100;
-    std::string hash = "73fd7971fa9e55a6cebd0d86495df7b61cac2d630fce76e0b9e8f190f1ced0cf";
+    double balance = 50000;
+    double betamount = 5000;
+    double estcrash = 1.29;
+    unsigned int games = 25;
+    std::string hash = "25dbaf31c4fbef123dbcea4da583d23cea8fb827c1dd9ab1f153fe9ab880eb1e";
+
+    std::vector<std::pair<std::string, double>> prevgames;
 
     std::string gamehash, lasthash;
     gamehash.clear();
     lasthash.clear();
 
+    //! calculate the game results
     for (unsigned int i = 0; i < games; i++) {
         if (lasthash.empty()) {
             gamehash = hash;
@@ -115,8 +122,18 @@ int main()
             gamehash = gen_gamehash(lasthash);
         }
         gen_crashpoint(gamehash, gamecrash);
-        printf("%s - %.2f\n", gamehash.c_str(), gamecrash);
+        prevgames.push_back(std::make_pair(gamehash, gamecrash));
         lasthash = gamehash;
+    }
+
+    //! reverse and play them back
+    for (unsigned int i = games - 1; i; i--) {
+        balance = balance - betamount;
+        if (estcrash < prevgames[i].second)
+            balance = balance + betamount + (betamount * estcrash);
+        if (balance <= 0)
+            return 0;
+        printf("%s - %.2f (balance: %.0f)\n", prevgames[i].first.c_str(), prevgames[i].second, balance);
     }
 
     return 0;
