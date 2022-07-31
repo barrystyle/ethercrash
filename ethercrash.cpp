@@ -99,13 +99,21 @@ void gen_crashpoint(std::string& server_seed, double& crash)
     crash = (floor((100 * e - h) / (e - h)) / 100);
 }
 
-int main()
+int main(int argc, char** argv)
 {
-    double gamecrash = 0;
-    double balance = 50000;
-    double betamount = 5000;
-    double estcrash = 1.29;
-    unsigned int games = 25;
+    if (argc < 6) {
+        printf("\nethercrash requires 5 arguments\n");
+        printf("./ethercrash balance betamount estcrash games hash\n");
+        printf("\n");
+        printf("example:\n");
+        printf("./ethercrash 50000 5000 1.29 25 25dbaf31c4fbef123dbcea4da583d23cea8fb827c1dd9ab1f153fe9ab880eb1e\n\n");
+        return 0;
+    }
+
+    double balance = 15000;
+    double betamount = 1000;
+    double estcrash = 5;
+    unsigned int games = 500;
     std::string hash = "25dbaf31c4fbef123dbcea4da583d23cea8fb827c1dd9ab1f153fe9ab880eb1e";
 
     std::vector<std::pair<std::string, double>> prevgames;
@@ -113,6 +121,7 @@ int main()
     std::string gamehash, lasthash;
     gamehash.clear();
     lasthash.clear();
+    double gamecrash = 0;
 
     //! calculate the game results
     for (unsigned int i = 0; i < games; i++) {
